@@ -1,10 +1,28 @@
 """Task 4: Shortest Path"""
 
-# import libraries
+import json
+import networkx as nx
+import rasterio
 
-# make some functions that can colour network paths
+
+# make some functions that can colour network paths when using draw
+def colour_path(graph, path, colour):
+    first = path[0]
+    for node in path[1:]:
+        graph.edges[first, node]['color'] = colour
+        first = node
+    return graph
+
+
+def get_colours(graph, default_node, default_edge):
+    node_colour = [graph.nodes[node].get('color', default_node) for node in graph.nodes]
+    edge_colour = [graph.edges[u, v].get('color', default_edge) for u, v in graph.edges]
+    return node_colour, edge_colour
+
 
 # open the itn json and access the 'roadlinks' layer
+with open('data/itn/solent_itn.json', 'r') as f:
+    solent_itn = json.load(f)
 
 # initialise a MultiDiGraph object
 
