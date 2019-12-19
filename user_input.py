@@ -26,6 +26,8 @@ else:
     exit()  # stop application if user is outside box extent
 
 # test if user is on the isle of wight and not in the sea
+# adjusted from https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
+
 island = gpd.GeoDataFrame.from_file('isle_of_wight.shp')
 
 if (island.contains(user_location)).bool():
