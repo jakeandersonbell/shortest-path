@@ -2,50 +2,54 @@
 
 ## import required packages
 import rasterio
-from rasterio.windows import Window
-from matplotlib import pyplot
-
+import rasterio.mask
+from shapely.geometry import Polygon, Point, mapping
+import fiona
 import numpy as np
 
-import pyproj
-
-## store data
-elevation = rasterio.open('sz.asc')
-
-## create 5km buffer around user location
-# test user location and box extents from task 1
+# create 5km buffer around user location
 user_location_easting = 449825 # coords for testing, close to centroid of isle of wight shapefile
 user_location_northing = 86492
-min_easting = 430000
-min_northing = 80000
-max_easting = 465000
-max_northing = 95000
+user_location = Point(user_location_easting, user_location_northing)
+buffer = Polygon(user_location.buffer(5000))
 
-# generate a rasterio 5km window based on user location
-# basic code from https://rasterio.readthedocs.io/en/stable/topics/reading.html
-# basic code from https://rasterio.readthedocs.io/en/stable/topics/windowed-rw.html#windowrw
+## mask elevation raster with buffer
+# Source: adjusted Mike T 12-09-13 https://gis.stackexchange.com/questions/52705/how-to-write-shapely-geometries-to-shapefiles
+# generate shapefile of shapely buffer polygon geometry
+poly = buffer # shapely geometry
 
-col_off = round(((user_location_easting - 5000) - (min_easting-5000))/5) # col_off in 5km distance to user location coords transformed to asc file col_off cell location
-row_off = round(((user_location_northing - 5000) - (min_northing-5000))/5)
-if col_off < 1:  # to ensure that col_off is within elevation raster, hence search radius might be less than 5km
-    col_off = 1
-if row_off < 1:
-    row_off = 1
+schema = {
+    'geometry': 'Polygon',
+    'properties': {'buffer_dist_m': 'int'},
+}
 
-width = 2000 # cellsize = 5m, user location in centre of window, therefore 5km into each direction -> 10km from col/row_off
-height = 2000
+with fiona.open('user_buffer.shp', 'w', 'ESRI Shapefile', schema) as c:
+    c.write({
+        'geometry': mapping(poly),
+        'properties': {'buffer_dist_m':5000},
+    })
 
-with rasterio.open('SZ.asc') as src:
-    user_window = src.read(1, window=Window(col_off, row_off, width, height))
+# source:https://rasterio.readthedocs.io/en/stable/topics/masking-by-shapefile.html
+with fiona.open("user_buffer.shp", "r") as shapefile:
+    shapes = [feature["geometry"] for feature in shapefile]
+with rasterio.open("SZ.asc") as src:
+    out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
+    out_meta = src.meta
+out_meta.update({"driver": "GTiff",
+                 "height": out_image.shape[1],
+                 "width": out_image.shape[2],
+                 "transform": out_transform})
 
-pyplot.imshow(user_window, cmap='pink')
-#pyplot.show()
+with rasterio.open("SZ_masked.asc", "w", **out_meta) as dest:
+    dest.write(out_image)
 
-# create a rasterised 5km buffer
+# test output
+from rasterio import plot
 
-## clip elevation array to 5km buffer
+SZ_masked = rasterio.open("SZ_masked.asc") # storing masked elevation asc
+rasterio.plot.show(SZ_masked) # showing masked elevation asc
 
-
-## identify highest point
-highest_point = np.max(user_window) # find and localise max z value
+# identify highest point
+#SZ_masked_np= np.loadtxt("SZ_masked.asc", skiprows=5)
+#highest_point = np.max(SZ_masked) # find and localise max z value
 #print("the highest point within 5kms of your location is: ", highest_point)
