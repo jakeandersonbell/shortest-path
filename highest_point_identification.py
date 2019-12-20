@@ -48,5 +48,5 @@ pyplot.imshow(user_window, cmap='pink')
 
 
 ## identify highest point
-elevation_np = np.loadtxt("SZ.asc", skiprows=6) # replace with buffer
-highest_point = np.amax(elevation_np) # find and localise max z value
+highest_point = np.amax(user_window) # find and localise max z value
+# print("the highest point within 5kms of your location is: ", highest_point)
