@@ -25,10 +25,8 @@ max_northing = 95000
 # basic code from https://rasterio.readthedocs.io/en/stable/topics/reading.html
 # basic code from https://rasterio.readthedocs.io/en/stable/topics/windowed-rw.html#windowrw
 
-user_easting_cell = round(((user_location_easting - (min_easting - 5000)) / 5) - 500)  # user location x coord transformed to asc file row off cell location
-user_northing_cell = round(((user_location_northing - (min_northing - 5000)) / 5) - 500)
-col_off = user_easting_cell - 1000 # 5km west of user location to generate 5km window around user location
-row_off = user_northing_cell - 1000 # 5km south of user location
+col_off = round(((user_location_easting - 5000) - (min_easting-5000))/5) # col_off in 5km distance to user location coords transformed to asc file col_off cell location
+row_off = round(((user_location_northing - 5000) - (min_northing-5000))/5)
 if col_off < 1:  # to ensure that col_off is within elevation raster, hence search radius might be less than 5km
     col_off = 1
 if row_off < 1:
@@ -41,7 +39,7 @@ with rasterio.open('SZ.asc') as src:
     user_window = src.read(1, window=Window(col_off, row_off, width, height))
 
 pyplot.imshow(user_window, cmap='pink')
-# pyplot.show()
+#pyplot.show()
 
 # create a rasterised 5km buffer
 
@@ -49,5 +47,5 @@ pyplot.imshow(user_window, cmap='pink')
 
 
 ## identify highest point
-highest_point = np.amax(user_window) # find and localise max z value
-# print("the highest point within 5kms of your location is: ", highest_point)
+highest_point = np.max(user_window) # find and localise max z value
+#print("the highest point within 5kms of your location is: ", highest_point)
