@@ -31,21 +31,21 @@ with fiona.open('user_buffer.shp', 'w', 'ESRI Shapefile', schema) as c:
     })
 
 # source:https://rasterio.readthedocs.io/en/stable/topics/masking-by-shapefile.html
-with fiona.open("user_buffer.shp", "r") as shapefile:
-    shapes = [feature["geometry"] for feature in shapefile]
-with rasterio.open("SZ.asc") as src:
+with fiona.open('user_buffer.shp', 'r') as shapefile:
+    shapes = [feature['geometry'] for feature in shapefile]
+with rasterio.open('SZ.asc') as src:
     out_image, out_transform = rasterio.mask.mask(src, shapes, crop=True)
     out_meta = src.meta
-out_meta.update({"driver": "GTiff",
-                 "height": out_image.shape[1],
-                 "width": out_image.shape[2],
-                 "transform": out_transform})
+out_meta.update({'driver': 'GTiff',
+                 'height': out_image.shape[1],
+                 'width': out_image.shape[2],
+                 'transform': out_transform})
 
-with rasterio.open("SZ_masked.asc", "w", **out_meta) as dest:
+with rasterio.open('SZ_masked.asc', 'w', **out_meta) as dest:
     dest.write(out_image)
 
 # identify value of highest point
-sz_masked = rasterio.open("SZ_masked.asc")  # storing masked elevation asc
+sz_masked = rasterio.open('SZ_masked.asc')  # storing masked elevation asc
 sz_masked_array = sz_masked.read(1)
 highest_point = np.max(sz_masked_array)  # find and localise max z value
 
@@ -61,5 +61,5 @@ highest_point_easting, highest_point_northing = sz_masked.xy(highest_point_row, 
 # save location of highest point
 highest_point = Point(highest_point_easting, highest_point_northing)
 
-#print("the highest point within 5km radius of you is ", np.max(sz_masked_array) ,"m high.")
-#print("the highest point is located at: ", highest_point)
+#print('the highest point within 5km radius of you is ', np.max(sz_masked_array) ,'m high.')
+#print('the highest point is located at: ', highest_point)
