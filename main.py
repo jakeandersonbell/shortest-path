@@ -16,8 +16,8 @@ class color:
 ########  task 1: User Input 
 # the output of this task, East and North corrdinate of the User 
 print ("Please insert your location coordinate in a British National Grid coordinate system (Easting,Northing)")
-East = float (input(" East: "))
-North = float (input("North: "))
+East = float (input(" Insert (Easting coordinate X) of your location: "))
+North = float (input(" Insert (Northing coordinate Y) of your location: "))
 
 
 # In[3]:
@@ -40,15 +40,7 @@ if East < 425000 or East > 470000 or North < 75000 or North > 100000:
 # In[ ]:
 
 
-get_ipython().system('conda install -y geopandas')
-get_ipython().system('conda install -y descartes')
-get_ipython().system('conda install -y networkx=2.4')
-get_ipython().system('conda install -c conda-forge/label/dev rasterio')
-get_ipython().system('conda install -y rtree=0.8.3')
-get_ipython().system('conda install -y cartopy')
-#!conda install -y shapely
-get_ipython().system('conda install -y shapely=1.6')
-get_ipython().system('conda install -y cartopy')
+
 
 
 # In[ ]:
