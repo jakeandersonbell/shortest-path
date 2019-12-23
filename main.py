@@ -16,8 +16,8 @@ class color:
 ########  task 1: User Input 
 # the output of this task, East and North corrdinate of the User 
 print ("Please insert your location coordinate in a British National Grid coordinate system (Easting,Northing)")
-East = float (input(" Insert (Easting coordinate X) of your location: "))
-North = float (input(" Insert (Northing coordinate Y) of your location: "))
+East = float (input(" Insert ( Easting coordinate X) of your location: "))
+North = float (input(" Insert ( Northing coordinate Y) of your location: "))
 
 
 # In[3]:
@@ -31,7 +31,7 @@ if East < 425000 or East > 470000 or North < 75000 or North > 100000:
     
 # Note: #### This part is written in this way to cover the limitation which is mentioned in task 6 
 # Without considering the limitation in task 6, the command can be written as following 
-#         if East < 430000 or East > 965000 or North < 8000 or North > 95000:
+#         if East < 430000 or East > 965000 or North < 80000 or North > 95000:
 #   print ("You are outside the Isle of Wight, pleases check your coordinate and try again") 
 #   import sys 
 #    sys.exit()
@@ -170,7 +170,7 @@ road_nodes = d['roadnodes']
 # In[ ]:
 
 
-# task 3: Nearest Integrated Transport Network
+# task 3: Nearest Integrated Transport Network ITN
 # identeifing the nearst nodes to the user, output the node coordinate and name 
 
 def neaest_node (x , y):
@@ -205,9 +205,9 @@ Highest_point_node_name_nearest, Highest_point_node_corrdinate_east , Highest_po
 
 # task 3: Nearest Integrated Transport Network
 # printing the results 
-print( color.BOLD + 'Nearst NIT node to you:' + color.END)
+print( color.BOLD + 'Nearst ITN node to you:' + color.END)
 print('Node name','"',user_node_name_nearest,'"','  Coordinate','  East:', user_node_corrdinate_east ,'     North',user_node_corrdinate_north)
-print( color.BOLD +'Nearst NIT node to the highest point:'+ color.END)
+print( color.BOLD +'Nearst ITN node to the highest point:'+ color.END)
 print('Node name','"',Highest_point_node_name_nearest,'"','  Coordinate','  East:', Highest_point_node_corrdinate_east ,'   North',Highest_point_node_corrdinate_north)
 
 
@@ -270,7 +270,7 @@ orgion_p = [East , North]
 
 
 # Task 5: Map Plotting 
-# defining the walking path between the user and the nearest NIT node 
+# defining the walking path between the user and the nearest ITN node
 # and defining the walking path between highest point and its nearest NIT node
 waking_route_user_node_lons = [East, user_node_corrdinate_east]
 waking_route_user_node_lons_lats = [North , user_node_corrdinate_north]
