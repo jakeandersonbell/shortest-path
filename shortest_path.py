@@ -3,10 +3,10 @@
 import json
 import networkx as nx
 import rasterio
-import time
-from progress_bar import printprogressbar
 
 dataset = rasterio.open('data/elevation/sz.asc')
+start = 'osgb4000000026213564'
+end = 'osgb5000005101239096'
 
 
 # make some functions that can colour network paths when using draw
@@ -58,10 +58,6 @@ for i, link in enumerate(road_links):
     g.add_edge(road_links[link]['end'], road_links[link]['start'], fid=link,
                weight=(road_links[link]['length'] + backward))
     # print(road_links[link]['start'])
-
-
-start = 'osgb4000000026213564'
-end = 'osgb5000005101239096'
 
 # do dijkstra path method on user location and high point
 path = nx.dijkstra_path(g, source=start, target=end, weight="weight")
