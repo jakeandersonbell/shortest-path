@@ -4,11 +4,6 @@ from rasterio.transform import from_origin
 import numpy as np
 
 
-# get min values of elevation raster
-elevation = rasterio.open('SZ.asc')  # storing elevation raster
-elevation_array = elevation.read(1)
-lowest_elev = float(np.min(elevation_array))  # identify min z value
-
 
 # find extend of new raster
 min_easting, min_northing, max_easting, max_northing = 430000, 80000, 465000, 95000 # storing box extent
@@ -27,15 +22,15 @@ dif_x_cell = int((ext_max_easting - min_x)/5)
 dif_y_cell = int((max_y - ext_min_northing)/5)
 
 pixel_size = 5
-arr = np.zeros((dif_y_cell, dif_x_cell))
+arr = np.zeros((dif_y_cell, dif_x_cell)) # raster value set to 0 because raster extension should be at sea level
 transform = from_origin(min_x, max_y, pixel_size, pixel_size)
-new_dataset = rasterio.open('extension_a.tif', 'w', driver='GTiff',
+extension_a = rasterio.open('extension_a.tif', 'w', driver='GTiff',
                             height = arr.shape[0], width = arr.shape[1],
                             count=1, dtype=str(arr.dtype),
                             crs='+init=epsg:27700',
                             transform=transform)
-new_dataset.write(arr, 1)
-new_dataset.close()
+extension_a.write(arr, 1)
+extension_a.close()
 
 # raster b: extent left to elevation raster
 # raster c: extent above elevation raster
