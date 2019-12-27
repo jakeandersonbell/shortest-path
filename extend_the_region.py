@@ -4,15 +4,7 @@ from rasterio.transform import from_origin
 import numpy as np
 
 
-
-# find extend of new raster
-min_easting, min_northing, max_easting, max_northing = 430000, 80000, 465000, 95000 # storing box extent
-min_from_edge = 5000
-elev_min_easting, elev_min_northing, elev_max_easting, elev_max_northing = min_easting - min_from_edge , min_northing - min_from_edge, max_easting + min_from_edge, max_northing + min_from_edge # coordinates of elevation raster
-ext_min_easting, ext_min_northing, ext_max_easting, ext_max_northing = elev_min_easting - min_from_edge, elev_min_northing- min_from_edge, elev_max_easting + min_from_edge, elev_max_northing + min_from_edge # max outer coordinates of extended raster
-
-
-# create new raster
+# function to create new raster
 # adjusted/based on: Bryce Frank 18-04-18 https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
 def new_raster(min_x, max_y, max_easting, min_northing, out_raster):
     pixel_size = 5
@@ -28,10 +20,19 @@ def new_raster(min_x, max_y, max_easting, min_northing, out_raster):
     extension.write(arr, 1)
     extension.close()
 
+
+# find extend of new raster
+min_easting, min_northing, max_easting, max_northing = 430000, 80000, 465000, 95000 # storing box extent
+min_from_edge = 5000
+elev_min_easting, elev_min_northing, elev_max_easting, elev_max_northing = min_easting - min_from_edge , min_northing - min_from_edge, max_easting + min_from_edge, max_northing + min_from_edge # coordinates of elevation raster
+ext_min_easting, ext_min_northing, ext_max_easting, ext_max_northing = elev_min_easting - min_from_edge, elev_min_northing- min_from_edge, elev_max_easting + min_from_edge, elev_max_northing + min_from_edge # max outer coordinates of extended raster
+
+
+# create new raster
 new_raster(ext_min_easting, elev_min_northing, ext_max_easting, ext_min_northing,'extension_a.tif') # raster a: extent below elevation raster
-# raster b: extent left to elevation raster
-# raster c: extent above elevation raster
-# raster d: extent right to elevation raster
+new_raster(ext_min_easting, elev_max_northing, elev_min_easting, elev_min_northing,'extension_b.tif') # raster b: extent left to elevation raster
+new_raster(ext_min_easting, ext_max_northing, ext_max_easting, elev_max_northing, 'extension_c.tif') # raster c: extent above elevation raster
+new_raster(elev_max_easting, elev_max_northing, ext_max_easting, elev_min_northing, 'extension_d.tif') # raster d: extent right to elevation raster
 
 
 # merge new rasters and elevation raster
