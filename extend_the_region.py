@@ -1,8 +1,9 @@
 """Task 6: Extend the Region"""
 import rasterio
 from rasterio.transform import from_origin
+from rasterio.merge import merge
+from rasterio import plot
 import numpy as np
-
 
 # function to create new raster
 # adjusted/based on: Bryce Frank 18-04-18 https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
@@ -35,7 +36,25 @@ new_raster(ext_min_easting, ext_max_northing, ext_max_easting, elev_max_northing
 new_raster(elev_max_easting, elev_max_northing, ext_max_easting, elev_min_northing, 'extension_d.tif') # raster d: extent right to elevation raster
 
 
-# merge new rasters and elevation raster
+# merge new rasters
+# source https://rasterio.readthedocs.io/en/latest/api/rasterio.merge.html
+extension_a = rasterio.open('extension_a.tif')
+extension_b = rasterio.open('extension_b.tif')
+extension_c = rasterio.open('extension_c.tif')
+extension_d = rasterio.open('extension_d.tif')
+elevation = rasterio.open('sz.asc')
+
+extension_raster = [extension_a, extension_b, extension_c, extension_d, elevation] # list of extension rasters
+
+extension_merged, out_trans = merge(extension_raster) # merge extension rasters
+
+rasterio.open('extension_merged.tif', 'w', driver='GTiff',
+                                height=extension_merged.shape[0], width=extension_merged.shape[1],
+                                count=1, dtype=str(extension_merged.dtype),
+                                crs='+init=epsg:27700',
+                                transform=out_trans) # write merged extension raster
+extension = rasterio.open('extension_merged.tif')
+rasterio.plot.show(extension)
 
 
 
