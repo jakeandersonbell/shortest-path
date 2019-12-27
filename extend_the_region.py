@@ -13,25 +13,22 @@ ext_min_easting, ext_min_northing, ext_max_easting, ext_max_northing = elev_min_
 
 
 # create new raster
-# adjusted, source: Bryce Frank 18-04-18 https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
-# raster a: extent below elevation raster
-min_x = ext_min_easting
-max_y = elev_min_northing
+# adjusted/based on: Bryce Frank 18-04-18 https://gis.stackexchange.com/questions/279953/numpy-array-to-gtiff-using-rasterio-without-source-raster
+def new_raster(min_x, max_y, max_easting, min_northing, out_raster):
+    pixel_size = 5
+    dif_x_cell = int((max_easting - min_x)/5)
+    dif_y_cell = int((max_y - min_northing)/5)
+    arr = np.zeros((dif_y_cell, dif_x_cell))  # raster value set to 0 because raster extension should be at sea level
+    transform = from_origin(min_x, max_y, pixel_size, pixel_size)
+    extension = rasterio.open(out_raster, 'w', driver='GTiff',
+                                height=arr.shape[0], width=arr.shape[1],
+                                count=1, dtype=str(arr.dtype),
+                                crs='+init=epsg:27700',
+                                transform=transform)
+    extension.write(arr, 1)
+    extension.close()
 
-dif_x_cell = int((ext_max_easting - min_x)/5)
-dif_y_cell = int((max_y - ext_min_northing)/5)
-
-pixel_size = 5
-arr = np.zeros((dif_y_cell, dif_x_cell)) # raster value set to 0 because raster extension should be at sea level
-transform = from_origin(min_x, max_y, pixel_size, pixel_size)
-extension_a = rasterio.open('extension_a.tif', 'w', driver='GTiff',
-                            height = arr.shape[0], width = arr.shape[1],
-                            count=1, dtype=str(arr.dtype),
-                            crs='+init=epsg:27700',
-                            transform=transform)
-extension_a.write(arr, 1)
-extension_a.close()
-
+new_raster(ext_min_easting, elev_min_northing, ext_max_easting, ext_min_northing,'extension_a.tif') # raster a: extent below elevation raster
 # raster b: extent left to elevation raster
 # raster c: extent above elevation raster
 # raster d: extent right to elevation raster
