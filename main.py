@@ -5,11 +5,10 @@ from user_input import *
 
 """Task 1: User Input"""
 
-user_location = user_input()  #
+user_location = user_input()  # Returns shapely Point feature of user_location
 iow_extent, iow_5k_extent = get_ext_poly()
-if check_extent(user_location, iow_extent, iow_5k_extent):
-    # We don't need to extend the region
-    pass
+check_extent(user_location, iow_extent, iow_5k_extent)
+
 
 if on_land(user_location):
     # The user is on land

@@ -33,15 +33,17 @@ def user_input():
 
 # test if user is within box extent aka not closer than 5km to the raster edge
 def check_extent(user, extent, extent_5k):
+    inside, extend = False, False
     if extent.contains(user):
         inside = True
     else:
-        inside = True
         print('You are too close to the edge - cannot calculate quickest route to the highest point')
         exit()  # stop application if user is outside box extent
     if extent_5k.contains(user):
         extend = True
-    return extend
+    if not extend and inside:
+        # We must extend the region, put the function in here
+        pass
 
 
 # test if user is on the isle of wight and not in the sea
