@@ -2,6 +2,7 @@
 """Flood Emergency Planning"""
 
 from user_input import *
+from highest_point_identification import *
 
 """Task 1: User Input"""
 
@@ -10,14 +11,11 @@ iow_extent, iow_5k_extent = get_ext_poly()
 check_extent(user_location, iow_extent, iow_5k_extent)
 
 
-if on_land(user_location):
-    # The user is on land
-    pass
-
-
 """Task 2: Highest Point Identification"""
 
-
+high_point = high_point(user_location)
+print('the highest point within 5km radius of you is ', high_point[0], 'm high.')
+print('the highest point is located at: ', high_point[1])
 # Use window function to limit size of raster around the buffered point
 
 # Get the elevation band
