@@ -81,16 +81,12 @@ def naismith_path(start, end, dataset):
     # print("Plotting path\n")
     nx.draw(path_graph, node_size=1)
 
-    df = pd.DataFrame({"A": path})
+    df = pd.DataFrame({"A": path[:-1]})
     coords = []
     # getting the coords
     for i, p in enumerate(path[:-1]):
         coord = [tuple(l) for l in road_links[g.get_edge_data(p, path[i + 1])[0]['fid']]['coords']]
         coords.append(LineString(coord))
-    print(len(coords))
-    print(len(coords[-1].coords))
-    final = coords[-1].coords[-1]
-    coords.append(Point(final))
 
     df['geometry'] = coords
     gdf = gpd.GeoDataFrame(df, crs={'init': 'epsg:27700'}, geometry=df['geometry'])

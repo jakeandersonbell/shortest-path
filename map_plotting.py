@@ -51,7 +51,7 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
     # nx.draw(g, node_size=1, origin="upper", extent=extent, zorder=0)
 
     # 2) imshow for the elevation raster
-    im = plt.imshow(elevation.read(1), cmap='Greens_r', origin="upper", extent=extent, zorder=0, alpha=0.3, resample='True',
+    im = plt.imshow(elevation.read(1), cmap='terrain', extent=extent, zorder=0, alpha=0.6, resample='True',
                     vmax=numpy.amax(elevation.read(1)), vmin=numpy.amin(elevation.read(1)))
 
     # 3) plotting the shortest path
