@@ -1,3 +1,4 @@
+
 """Task 5: Map Plotting"""
 
 import rasterio
@@ -46,8 +47,8 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
     ax.imshow(background_image, origin="upper", extent=extent, zorder=0)
 
     # sjer_plot_locations.plot()
-    """Graph plotting is not required for this task"""
-    # nx.draw(graph, node_size=1, origin="upper", extent=extent, zorder=0)
+    """AS far as I am aware, we do not need to plot the graph in this task"""
+    # nx.draw(g, node_size=1, origin="upper", extent=extent, zorder=0)
 
     # 2) imshow for the elevation raster
     im = plt.imshow(elevation.read(1), cmap='Greens_r', origin="upper", extent=extent, zorder=0, alpha=0.3, resample='True',
