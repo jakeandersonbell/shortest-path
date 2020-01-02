@@ -1,7 +1,15 @@
 """Task 4: Shortest Path"""
 
 import json
+import rasterio
 import networkx as nx
+import geopandas as gpd
+import pandas as pd
+from shapely.geometry import LineString, Point
+
+# start = ['osgb4000000026145382', 0]
+# end = ['osgb4000000026146148', 0]
+# dataset = rasterio.open('data/elevation/sz.asc')
 
 
 # make some functions that can colour network paths when using draw
@@ -53,7 +61,8 @@ def naismith_path(start, end, dataset):
         # print(road_links[link]['start'])
 
     # do dijkstra path method on user location and high point
-    path = nx.dijkstra_path(g, source=start, target=end, weight="weight")
+    # start and end are lists of [node_name, shapely Point]
+    path = nx.dijkstra_path(g, source=start[0], target=end[0], weight="weight")
 
     path_graph = g.subgraph(path)
 
@@ -69,10 +78,23 @@ def naismith_path(start, end, dataset):
     # node_colors, edge_colors = get_colours(g_1)
     # nx.draw(g_1, node_size=1, edge_color=edge_colors, node_color=node_colors)
 
-    print("Plotting path\n")
+    # print("Plotting path\n")
     nx.draw(path_graph, node_size=1)
 
+    df = pd.DataFrame({"A": path})
+    coords = []
+    # getting the coords
+    for i, p in enumerate(path[:-1]):
+        coord = [tuple(l) for l in road_links[g.get_edge_data(p, path[i + 1])[0]['fid']]['coords']]
+        coords.append(LineString(coord))
+    print(len(coords))
+    print(len(coords[-1].coords))
+    final = coords[-1].coords[-1]
+    coords.append(Point(final))
+
+    df['geometry'] = coords
+    gdf = gpd.GeoDataFrame(df, crs={'init': 'epsg:27700'}, geometry=df['geometry'])
+    return gdf
 
 
-
-
+# print(naismith_path(start, end, dataset))
