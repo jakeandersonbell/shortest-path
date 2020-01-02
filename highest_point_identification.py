@@ -3,12 +3,13 @@
 # import required packages
 import rasterio
 import rasterio.mask
-from shapely.geometry import Polygon, Point, mapping
 import fiona
 import numpy as np
+from shapely.geometry import Polygon, Point, mapping
+from rasterio import MemoryFile
 
 
-def high_point(user_location):
+def high_point(user_location, extend):
     # Mask elevation raster with buffer
     # Source: adjusted Mike T 12-09-13
     # https://gis.stackexchange.com/questions/52705/how-to-write-shapely-geometries-to-shapefiles
@@ -28,7 +29,7 @@ def high_point(user_location):
     with fiona.open('data/temp/user_buffer.shp', 'r') as shapefile:
         shapes = [feature['geometry'] for feature in shapefile]
 
-    dataset = rasterio.open('data/elevation/SZ.asc')
+    dataset = get_elevation(extend)
     out_image, out_transform = rasterio.mask.mask(dataset, shapes, crop=True)
     out_meta = dataset.meta
     out_meta.update({'driver': 'GTiff',
@@ -59,3 +60,21 @@ def high_point(user_location):
     highest_point = Point(highest_point_easting, highest_point_northing)
 
     return [np.max(sz_masked_array), highest_point, dataset]  # Max height, highest point
+
+
+def get_elevation(extend):
+    dataset = rasterio.open('data/elevation/SZ.asc')
+    if extend:
+        print("You're close to the edge\nHaving to extend the raster...")
+        elevation = np.pad(dataset.read(1), (2500, 2500), 'constant', constant_values=(0, 0))
+        with rasterio.Env():
+            profile = dataset.profile
+            profile.update(dtype=rasterio.uint8, count=1)
+            with MemoryFile as memf:
+                with memf.open(**profile) as dataset:
+                    dataset.write(elevation)
+                    del elevation
+                with memf.open() as dataset:
+                    return dataset
+
+    return dataset

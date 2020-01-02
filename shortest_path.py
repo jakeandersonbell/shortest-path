@@ -64,25 +64,8 @@ def naismith_path(start, end, dataset):
     # start and end are lists of [node_name, shapely Point]
     path = nx.dijkstra_path(g, source=start[0], target=end[0], weight="weight")
 
-    path_graph = g.subgraph(path)
-
-    # for i, p in enumerate(path[:-1]):
-    #     print(p + ' --> ' + path[i + 1])
-    #     print('    ' + str(path_graph.get_edge_data(p, path[i + 1])))
-    #     print('    ' + str(path_graph.get_edge_data(path[i + 1], p)))
-
-    g.get_edge_data(path[0], g)
-
-    # Display the path
-    # g_1 = colour_path(g, path, "red")
-    # node_colors, edge_colors = get_colours(g_1)
-    # nx.draw(g_1, node_size=1, edge_color=edge_colors, node_color=node_colors)
-
-    # print("Plotting path\n")
-    nx.draw(path_graph, node_size=1)
-
     df = pd.DataFrame({"A": path[:-1]})
-    coords = []
+    coords = []  # Initailise a list to store LineString data
     # getting the coords
     for i, p in enumerate(path[:-1]):
         coord = [tuple(l) for l in road_links[g.get_edge_data(p, path[i + 1])[0]['fid']]['coords']]
@@ -92,5 +75,3 @@ def naismith_path(start, end, dataset):
     gdf = gpd.GeoDataFrame(df, crs={'init': 'epsg:27700'}, geometry=df['geometry'])
     return gdf
 
-
-# print(naismith_path(start, end, dataset))

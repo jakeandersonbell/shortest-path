@@ -16,6 +16,9 @@ from shapely.geometry import Point
 
 
 def map_plot(user_location, user_node, high_point, high_node, elevation, shortest_path_gpd):
+    """This function plots a map of the user_location, highest point and shortest path
+    over an OS Explorer and elevation raster basemap.
+    """
     # background and the map extent
     background = rasterio.open('data/background/raster-50k_2724246.tif')
     back_array = background.read(1)

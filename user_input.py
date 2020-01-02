@@ -47,11 +47,11 @@ def check_extent(user, extent, extent_5k):
         print('You are too close to the edge - cannot calculate quickest route to the highest point')
         exit()  # stop application if user is outside box extent
     if extent_5k.contains(user):
-        extend = True
-    if not extend and inside:
-        # We must extend the region, put the function in here
-        pass
+        if inside:
+            # We must extend the region, put the function in here
+            extend = True
     on_land(user)
+    return extend
 
 
 # test if user is on the isle of wight and not in the sea

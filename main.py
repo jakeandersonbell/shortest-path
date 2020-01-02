@@ -13,13 +13,13 @@ from shapely.geometry import Point
 
 user_location = user_input()  # Returns shapely Point feature of user_location
 iow_extent, iow_5k_extent = get_ext_poly()
-check_extent(user_location, iow_extent, iow_5k_extent)
+extend = check_extent(user_location, iow_extent, iow_5k_extent)  # Returns True idf raster region requires extending
 
 
 """Task 2: Highest Point Identification"""
 
 idx = make_index()
-high_point = high_point(user_location)
+high_point = high_point(user_location, extend)
 dataset = high_point[2]  # pop?
 end_node = nearest_itn(high_point[1], idx)
 print('The highest point within 5km radius of you is ', high_point[0], 'm high.')
@@ -43,7 +43,7 @@ shortest_path_gpd = naismith_path(start_node, end_node, dataset)
 """Task 5: Map Plotting"""
 
 
-map_plot(user_location, start_node[0], high_point[1], end_node[0], dataset, shortest_path_gpd)
+map_plot(user_location, start_node[1], high_point[1], end_node[1], dataset, shortest_path_gpd)
 
 
 """Task 6: Extend the Region"""
