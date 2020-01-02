@@ -14,7 +14,7 @@ from shapely.geometry import Point
 # high_point_node = Point(())
 
 
-def map_plot(user_location, user_node, high_point, high_node, elevation, graph, shortest_path_gpd):
+def map_plot(user_location, user_node, high_point, high_node, elevation, shortest_path_gpd):
     # background and the map extent
     background = rasterio.open('raster-50k_2724246.tif')
     back_array = background.read(1)
@@ -46,7 +46,8 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, graph, 
     ax.imshow(background_image, origin="upper", extent=extent, zorder=0)
 
     # sjer_plot_locations.plot()
-    nx.draw(graph, node_size=1, origin="upper", extent=extent, zorder=0)
+    """Graph plotting is not required for this task"""
+    # nx.draw(graph, node_size=1, origin="upper", extent=extent, zorder=0)
 
     # 2) imshow for the elevation raster
     im = plt.imshow(elevation.read(1), cmap='Greens_r', origin="upper", extent=extent, zorder=0, alpha=0.3, resample='True',
