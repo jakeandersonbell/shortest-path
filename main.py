@@ -5,6 +5,8 @@ from user_input import user_input, get_ext_poly, check_extent
 from highest_point_identification import high_point
 from nearest_itn import make_index, nearest_itn
 from shortest_path import naismith_path
+from map_plotting import map_plot
+from shapely.geometry import Point
 
 """Task 1: User Input"""
 
@@ -19,37 +21,30 @@ check_extent(user_location, iow_extent, iow_5k_extent)
 idx = make_index()
 high_point = high_point(user_location)
 dataset = high_point[2]  # pop?
-end_point = nearest_itn(high_point[1], idx)
-print('the highest point within 5km radius of you is ', high_point[0], 'm high.')
-print('the highest point is located at: ', high_point[1])
+end_node = nearest_itn(high_point[1], idx)
+print('The highest point within 5km radius of you is ', high_point[0], 'm high.')
+print('The highest point is located at: ', high_point[1])
+print('The nearest node to this is: ', end_node[0])
+print('This point is located at: ', end_node[1])
 
 
 """Task 3: Nearest Integrated Transport Network"""
 
 
-start_point = nearest_itn(user_location, idx)  # Nearest
+start_node = nearest_itn(user_location, idx)  # Nearest
 
 
 """Task 4: Shortest Path"""
 
 
-naismith_path(start_point, end_point, dataset)
-# import libraries
-
-# make some functions that can colour network paths
-
-# open the itn json and access the 'roadlinks' layer
-
-# initialise a MultiDiGraph object
-
-# make uphill directed edges adhere to Naismith's rule
-#   Naismith's rule will be implemented as a ratio between vertical and horizontal travel weight
-# Make downhill edges just have Naismith's weight
-
-# do dijkstra path method on user location and high point
+shortest_path_gpd = naismith_path(start_node, end_node, dataset)
 
 
 """Task 5: Map Plotting"""
+
+
+map_plot(user_location, start_node[0], high_point[1], end_node[0], dataset, shortest_path_gpd)
+
 
 """Task 6: Extend the Region"""
 
