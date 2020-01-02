@@ -17,26 +17,26 @@ from shapely.geometry import Point
 
 def map_plot(user_location, user_node, high_point, high_node, elevation, shortest_path_gpd):
     # background and the map extent
-    background = rasterio.open('raster-50k_2724246.tif')
+    background = rasterio.open('data/background/raster-50k_2724246.tif')
     back_array = background.read(1)
     palette = np.array([value for key, value in background.colormap(1).items()])
     background_image = palette[back_array]
 
     bounds = background.bounds
     extent = [bounds.left, bounds.right, bounds.bottom, bounds.top]
-    display_extent = [((user_location.xy()[0] + high_point.xy()[0]) / 2) - 5000,
-                      ((user_location.xy()[0] + high_point.xy()[0]) / 2) + 5000,
-                      ((user_location.xy()[1] + high_point.xy()[1]) / 2) - 5000,
-                      ((user_location.xy()[1] + high_point.xy()[1]) / 2) + 5000]
-    origin_p = [user_location.xy()[0], user_location.xy()[1]]
+    display_extent = [((user_location.x + high_point.x) / 2) - 5000,
+                      ((user_location.x + high_point.x) / 2) + 5000,
+                      ((user_location.y + high_point.y) / 2) - 5000,
+                      ((user_location.y + high_point.y) / 2) + 5000]
+    origin_p = [user_location.x, user_location.y]
 
     # Task 5: Map Plotting
     # defining the walking path between the user and the nearest NIT node
     # and defining the walking path between highest point and its nearest NIT node
-    waking_route_user_node_lons = [user_location.xy()[0], user_node.xy()[0]]
-    waking_route_user_node_lats = [user_location.xy()[1], user_node.xy()[1]]
-    waking_route_highest_point_lons = [high_point.xy()[0], high_node.xy()[0]]
-    waking_route_highest_point_lats = [high_point.xy()[1], high_node.xy()[1]]
+    waking_route_user_node_lons = [user_location.x, user_node.x]
+    waking_route_user_node_lats = [user_location.y, user_node.y]
+    waking_route_highest_point_lons = [high_point.x, high_node.x]
+    waking_route_highest_point_lats = [high_point.y, high_node.y]
 
     # Set up figure and extent
     fig = plt.figure(figsize=(3, 3), dpi=300)
@@ -58,9 +58,9 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
     shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
 
     # 4) scattering the user point the highest elevation point
-    ax.scatter(user_location.xy()[0], user_location.xy()[1], s=1.5, c='r', label='Your location')
+    ax.scatter(user_location.x, user_location.y, s=1.5, c='r', label='Your location')
 
-    ax.scatter(high_point.xy()[0], high_point.xy()[1], s=1.5, c='k', label='Highest_point', marker='*')
+    ax.scatter(high_point.x, high_point.y, s=1.5, c='k', label='Highest_point', marker='*')
     # 5) user_location.xy()[1] arrow
     x, y, arrow_length = 0.9, 0.95, 0.18
     ax.annotate('N', xy=(x, y), xytext=(x, y - arrow_length), arrowprops=dict(facecolor='black', width=2, headwidth=8),
@@ -77,5 +77,5 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
     ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route', linewidth=0.5,
             linestyle='dashed')
 
-    # sjer_plot_locations.plot
+    plt.show()
 
