@@ -5,12 +5,13 @@ from shapely.geometry import Point
 import geopandas as gpd
 
 
-def get_ext_poly(bb=(430000, 80000, 465000, 95000), radius=5000):
+def get_ext_poly(bb=(430000, 80000, 465000, 95000)):
     """Returns a Shapely Polygon for the extent of the area of interest.
     Also return a radius negatively buffered Polygon for the extent.
     """
     iow_extent = Polygon([[bb[0], bb[1]], [bb[0], bb[3]], [bb[2], bb[3]], [bb[0], bb[3]]])
-    iow_5k_extent = iow_extent.buffer(-radius)
+    iow_5k_extent = Polygon([[bb[0]+5000, bb[1]+5000], [bb[0]+5000, bb[3]-5000],
+                             [bb[2]-5000, bb[3]-5000], [bb[0]+5000, bb[3]-5000]])
     return [iow_extent, iow_5k_extent]
 
 
@@ -40,16 +41,15 @@ def user_input():
 def check_extent(user, extent, extent_5k):
     """Checks location of user to establish whether the raster needs extending.
     Also performs on land check"""
-    inside, extend = False, False
+    extend = False
     if extent.contains(user):
-        inside = True
+        pass
     else:
         print('You are too close to the edge - cannot calculate quickest route to the highest point')
         exit()  # stop application if user is outside box extent
-    if extent_5k.contains(user):
-        if inside:
-            # We must extend the region, put the function in here
-            extend = True
+    if not extent_5k.contains(user):
+        # We must extend the region
+        extend = True
     on_land(user)
     return extend
 
@@ -59,9 +59,7 @@ def check_extent(user, extent, extent_5k):
 
 def on_land(user):
     island = gpd.GeoDataFrame.from_file('data/shape/isle_of_wight.shp')
-    if (island.contains(user)).bool():
-        pass  # User is on land, full steam ahead
-    else:
+    if not (island.contains(user)).bool():
         print("You are not on the island")
         exit()  # stop application if user is outside box extent
 

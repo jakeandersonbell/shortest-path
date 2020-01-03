@@ -43,7 +43,7 @@ shortest_path_gpd = naismith_path(start_node, end_node, dataset)
 """Task 5: Map Plotting"""
 
 
-map_plot(user_location, start_node[1], high_point[1], end_node[1], dataset, shortest_path_gpd)
+map_plot(user_location, start_node[1], high_point[1], end_node[1], dataset, shortest_path_gpd, extend)
 
 
 """Task 6: Extend the Region"""

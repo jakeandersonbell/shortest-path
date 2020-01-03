@@ -15,7 +15,7 @@ from shapely.geometry import Point
 # high_point_node = Point(())
 
 
-def map_plot(user_location, user_node, high_point, high_node, elevation, shortest_path_gpd):
+def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, extend):
     """This function plots a map of the user_location, highest point and shortest path
     over an OS Explorer and elevation raster basemap.
     """
@@ -27,6 +27,9 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
 
     bounds = background.bounds
     extent = [bounds.left, bounds.right, bounds.bottom, bounds.top]
+    el_extent = extent
+    if extend:
+        el_extent[0], el_extent[2] = el_extent[0] + 1500, el_extent[2] - 1500
     display_extent = [((user_location.x + high_point.x) / 2) - 5000,
                       ((user_location.x + high_point.x) / 2) + 5000,
                       ((user_location.y + high_point.y) / 2) - 5000,
@@ -54,8 +57,8 @@ def map_plot(user_location, user_node, high_point, high_node, elevation, shortes
     # nx.draw(g, node_size=1, origin="upper", extent=extent, zorder=0)
 
     # 2) imshow for the elevation raster
-    im = plt.imshow(elevation.read(1), cmap='terrain', extent=extent, zorder=0, alpha=0.6, resample='True',
-                    vmax=numpy.amax(elevation.read(1)), vmin=numpy.amin(elevation.read(1)))
+    im = plt.imshow(dataset.read(1), extent=el_extent, cmap='terrain', origin='upper', zorder=0, alpha=0.6,
+                    resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
     # 3) plotting the shortest path
     shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
