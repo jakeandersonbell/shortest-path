@@ -25,17 +25,16 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     palette = np.array([value for key, value in background.colormap(1).items()])
     background_image = palette[back_array]
 
-    bounds = background.bounds
-    extent = [bounds.left, bounds.right, bounds.bottom, bounds.top]
-    el_extent = extent
+    bg_extent = [background.bounds.left, background.bounds.right, background.bounds.bottom, background.bounds.top]
+    el_extent = [dataset.bounds.left, dataset.bounds.right, dataset.bounds.bottom, dataset.bounds.top]
     if extend:
-        el_extent[0], el_extent[2] = el_extent[0] + 1500, el_extent[2] - 1500
+        pass
+        # el_extent[0], el_extent[1], el_extent[2], el_extent[3] = \
+        #     el_extent[0] + 1000, el_extent[1] + 1000, el_extent[2] - 1000, el_extent[3] - 1000
     display_extent = [((user_location.x + high_point.x) / 2) - 5000,
                       ((user_location.x + high_point.x) / 2) + 5000,
                       ((user_location.y + high_point.y) / 2) - 5000,
                       ((user_location.y + high_point.y) / 2) + 5000]
-    origin_p = [user_location.x, user_location.y]
-
     # Task 5: Map Plotting
     # defining the walking path between the user and the nearest NIT node
     # and defining the walking path between highest point and its nearest NIT node
@@ -50,11 +49,7 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.set_extent(display_extent, crs=ccrs.OSGB())
 
     # 1) imshow for the background
-    ax.imshow(background_image, origin="upper", extent=extent, zorder=0)
-
-    # sjer_plot_locations.plot()
-    """AS far as I am aware, we do not need to plot the graph in this task"""
-    # nx.draw(g, node_size=1, origin="upper", extent=extent, zorder=0)
+    ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
     # 2) imshow for the elevation raster
     im = plt.imshow(dataset.read(1), extent=el_extent, cmap='terrain', origin='upper', zorder=0, alpha=0.6,

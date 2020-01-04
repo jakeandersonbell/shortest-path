@@ -11,7 +11,8 @@ def nearest_itn(target_location, idx):
     obj = list(idx.nearest((target_location.xy[0][0], target_location.xy[1][0]), 1, objects=True))[0]
     start = obj.object
     start_p = Point((obj.bounds[0], obj.bounds[2]))
-    print("The nearest itn node to " + str(target_location) + " is: " + str(start) + " at: " + str(start_p))
+    print("The nearest itn node to " + str(target_location.bounds[0:2]) + " is: " +
+          str(start) + " at: " + str(start_p.bounds[0:2]))
     return [start, start_p]
 
 

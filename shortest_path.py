@@ -7,40 +7,29 @@ import geopandas as gpd
 import pandas as pd
 from shapely.geometry import LineString, Point
 
+
 # start = ['osgb4000000026145382', 0]
 # end = ['osgb4000000026146148', 0]
 # dataset = rasterio.open('data/elevation/sz.asc')
 
 
-# make some functions that can colour network paths when using draw
-def colour_path(graph, path, colour='blue'):
-    result = graph.copy()
-    first = path[0]
-    for node in path[1:]:
-        result.edges[first, node, 0]['color'] = colour
-        first = node
-    return result
-
-
-def get_colours(graph, default_node='blue', default_edge='blue'):
-    node_colour = [graph.nodes[node].get('color', default_node) for node in graph.nodes]
-    edge_colour = [graph.edges[u, v, k].get('color', default_edge) for u, v, k in graph.edges]
-    return node_colour, edge_colour
-
-
-def naismith_path(start, end, dataset):
-    elevation = dataset.read(1)
+def naismiths_network(dataset, restriction=False):
+    """Naismith's rule states that a reasonably fit person can walk at 5km/hr and an additional
+    minute should be added for each 10 m of climb. Walking speed is therefor 83.3metres/min and
+    climb component 10metres/min. Edge weight is penalised by elevation difference to a factor of the
+    walking:climbing speed ratio (8.3). This serves as a high resolution Naismith's weighting.
+    """
     print("Opening ITN\n")
     # open the itn json and access the 'roadlinks' layer
     with open('data/itn/solent_itn.json', 'r') as f:
         road_links = json.load(f)['roadlinks']
 
+    if restriction:  # Extra marks; This feature restricts user to non public roads
+        road_links = [k for k in road_links if 'private' not in road_links[k]['descriptiveTerm'].lower()]
+
     # initialise a MultiDiGraph object
     g = nx.MultiDiGraph()
 
-    # make uphill directed edges adhere to Naismith's rule
-    #   Naismith's rule will be implemented as a ratio between vertical and horizontal travel weight
-    # Make downhill edges just have length weight
     print("Calculating Naismith's Weights\n")
     for i, link in enumerate(road_links):
         prev_coords = road_links[link]['coords'][0]  # Coordinates of first node of edge
@@ -53,25 +42,33 @@ def naismith_path(start, end, dataset):
         if elev_diff > 0:  # Going uphill
             forward = elev_diff * 8.333  # The vert/horiz ratio multiplier
         elif elev_diff < 0:  # Downhill
-            backward = (elev_diff * -1) * 8.333
+            backward = (elev_diff * -1) * 8.333  # Ensure weight is always increasing
         g.add_edge(road_links[link]['start'], road_links[link]['end'], fid=link,
                    weight=(road_links[link]['length'] + forward), st_height=prev_elev)
         g.add_edge(road_links[link]['end'], road_links[link]['start'], fid=link,
                    weight=(road_links[link]['length'] + backward), st_height=next_elev)
         # print(road_links[link]['start'])
+    return [g, road_links]
 
+
+def dijkstra_path(start, end, g, road_links):
+    print("Calculating shortest path\n")
     # do dijkstra path method on user location and high point
     # start and end are lists of [node_name, shapely Point]
     path = nx.dijkstra_path(g, source=start[0], target=end[0], weight="weight")
 
     df = pd.DataFrame({"A": path[:-1]})
-    coords = []  # Initailise a list to store LineString data
+    coords, lengths, weights = [], [], []  # Initailise a list to store LineString data
     # getting the coords
     for i, p in enumerate(path[:-1]):
         coord = [tuple(l) for l in road_links[g.get_edge_data(p, path[i + 1])[0]['fid']]['coords']]
         coords.append(LineString(coord))
+        lengths.append(road_links[g.get_edge_data(p, path[i + 1])[0]['fid']]['length'])
+        weights.append(g.get_edge_data(p, path[i + 1])[0]['weight'])
 
     df['geometry'] = coords
+    df['length'] = lengths  # Define new columns for the Dataframe
+    df['weights'] = weights
+    df['travel_t'] = [i * 1.388 for i in weights]
     gdf = gpd.GeoDataFrame(df, crs={'init': 'epsg:27700'}, geometry=df['geometry'])
     return gdf
-
