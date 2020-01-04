@@ -63,6 +63,6 @@ def on_land(user_location, boundary_shp='data/shape/isle_of_wight.shp'):
     ."""
     island = gpd.GeoDataFrame.from_file(boundary_shp)
     if not (island.contains(user_location)).bool():
-        print("You are not on the island")
+        print("You are already in the water")
         exit()  # stop application if user is outside box extent
 
