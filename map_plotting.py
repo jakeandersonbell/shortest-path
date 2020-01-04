@@ -6,17 +6,10 @@ import numpy
 import matplotlib.pyplot as plt
 import numpy as np
 import cartopy.crs as ccrs
-import networkx as nx
-from shapely.geometry import Point
-
-# user_location = Point((450000, 87000))
-# user_location_node = Point((448523, 96635))
-# high_point = Point((447532, 83442))
-# high_point_node = Point(())
 
 
-def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, extend):
-    """This function plots a map of the user_location, highest point and shortest path
+def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd):
+    """This function plots a map of the user_location, highest point and shortest path gpd df
     over an OS Explorer and elevation raster basemap.
     """
     # background and the map extent
@@ -27,10 +20,7 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
 
     bg_extent = [background.bounds.left, background.bounds.right, background.bounds.bottom, background.bounds.top]
     el_extent = [dataset.bounds.left, dataset.bounds.right, dataset.bounds.bottom, dataset.bounds.top]
-    if extend:
-        pass
-        # el_extent[0], el_extent[1], el_extent[2], el_extent[3] = \
-        #     el_extent[0] + 1000, el_extent[1] + 1000, el_extent[2] - 1000, el_extent[3] - 1000
+
     display_extent = [((user_location.x + high_point.x) / 2) - 5000,
                       ((user_location.x + high_point.x) / 2) + 5000,
                       ((user_location.y + high_point.y) / 2) - 5000,
@@ -48,30 +38,29 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax = fig.add_subplot(1, 1, 1, projection=ccrs.OSGB())
     ax.set_extent(display_extent, crs=ccrs.OSGB())
 
-    # 1) imshow for the background
+    # imshow for the background
     ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
-    # 2) imshow for the elevation raster
+    # imshow for the elevation raster
     im = plt.imshow(dataset.read(1), extent=el_extent, cmap='terrain', origin='upper', zorder=0, alpha=0.6,
                     resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
-    # 3) plotting the shortest path
+    # plotting the shortest path
     shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
 
-    # 4) scattering the user point the highest elevation point
+    # scattering the user point the highest elevation point
     ax.scatter(user_location.x, user_location.y, s=1.5, c='r', label='Your location')
-
     ax.scatter(high_point.x, high_point.y, s=1.5, c='k', label='Highest_point', marker='*')
-    # 5) user_location.xy()[1] arrow
+    # user_location.xy()[1] arrow
     x, y, arrow_length = 0.9, 0.95, 0.18
     ax.annotate('N', xy=(x, y), xytext=(x, y - arrow_length), arrowprops=dict(facecolor='black', width=2, headwidth=8),
                 ha='center', va='center', fontsize=9, xycoords=ax.transAxes)
 
-    # 6) plotting the colorbar
+    # 6) plotting the color bar
     cbar = plt.colorbar(fraction=0.03, pad=0.03)
     cbar.set_label(r"Elevation", size=8)
     cbar.ax.tick_params(labelsize=5)
-    # 7) plotting the walking pathes
+    # 7) plotting the walking paths
     ax.plot(waking_route_user_node_lons, waking_route_user_node_lats, c='k', label='walking route', linewidth=0.5,
             linestyle='dashed')
     plt.legend(fontsize=3, loc=2)

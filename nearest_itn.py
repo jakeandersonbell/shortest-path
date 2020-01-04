@@ -1,13 +1,14 @@
 """Task 3: Nearest Integrated Transport Network"""
 
-import rasterio
 from shapely.geometry import Point
 import geopandas as gpd
 from rtree import index
 
 
 def nearest_itn(target_location, idx):
-    # find nearest
+    """Takes in location and index of nodes
+    Returns list(object name, Point(node location)).
+    """
     obj = list(idx.nearest((target_location.xy[0][0], target_location.xy[1][0]), 1, objects=True))[0]
     start = obj.object
     start_p = Point((obj.bounds[0], obj.bounds[2]))
@@ -16,14 +17,13 @@ def nearest_itn(target_location, idx):
     return [start, start_p]
 
 
-def make_index():
-    # Read in the ITN nodes
-    nodes = gpd.read_file('data/roads/nodes.shp')
+def make_index(node_shape_path='data/roads/nodes.shp'):
+    """Reads in a shp. of nodes and returns an rtree index"""
+    nodes = gpd.read_file(node_shape_path)
 
-    # create and index, bounding box
     idx = index.Index()
 
-    # loop though points in nodes and insert - I think this works
+    # loop though points in nodes and insert
     for i, j in enumerate(nodes.iterrows()):
         pbr = j[1][2].xy[0][0], j[1][2].xy[1][0], j[1][2].xy[0][0], j[1][2].xy[1][0]
         idx.insert(i, pbr, obj=j[1][0])

@@ -38,28 +38,31 @@ def user_input():
 
 
 # test if user is within box extent aka not closer than 5km to the raster edge
-def check_extent(user, extent, extent_5k):
+def check_extent(user_location, extent, extent_5k):
     """Checks location of user to establish whether the raster needs extending.
     Also performs on land check"""
     extend = False
-    if extent.contains(user):
+    if extent.contains(user_location):
         pass
     else:
         print('You are too close to the edge - cannot calculate quickest route to the highest point')
         exit()  # stop application if user is outside box extent
-    if not extent_5k.contains(user):
+    if not extent_5k.contains(user_location):
         # We must extend the region
         extend = True
-    on_land(user)
+    on_land(user_location)
     return extend
 
 
 # test if user is on the isle of wight and not in the sea
 # adjusted from https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
 
-def on_land(user):
-    island = gpd.GeoDataFrame.from_file('data/shape/isle_of_wight.shp')
-    if not (island.contains(user)).bool():
+def on_land(user_location, boundary_shp='data/shape/isle_of_wight.shp'):
+    """Checks whether user is within the confines of the area of interest
+    IOW shp. as default
+    ."""
+    island = gpd.GeoDataFrame.from_file(boundary_shp)
+    if not (island.contains(user_location)).bool():
         print("You are not on the island")
         exit()  # stop application if user is outside box extent
 
