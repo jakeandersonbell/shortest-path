@@ -1,14 +1,13 @@
 """Task 4: Shortest Path"""
 
 import json
-import rasterio
 import networkx as nx
 import geopandas as gpd
 import pandas as pd
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 
 
-def naismiths_network(dataset, restriction=False):
+def naismiths_network(dataset, restriction=False, flood_poly=False):
     """Takes in rasterio elevation object and optional public road restriction bool and
     returns list(naismith weighted nx.MultiDiGraph, dict(road_links))
 
@@ -17,17 +16,23 @@ def naismiths_network(dataset, restriction=False):
     climb component 10metres/min. Edge weight is penalised by elevation difference to a factor of the
     walking:climbing speed ratio (8.3). This serves as a high resolution Naismith's weighting.
     """
-    print("Opening ITN\n")
+    print("\nOpening ITN...")
     # open the itn json and access the 'roadlinks' layer
     with open('data/itn/solent_itn.json', 'r') as f:
         road_links = json.load(f)['roadlinks']
 
-    if restriction:  # Extra marks; This feature can restrict the user to public roads
-        road_links = [k for k in road_links if 'private' not in road_links[k]['descriptiveTerm'].lower()]
+    if flood_poly:
+        print("\nFinding the roads that haven't been flooded...")
+        road_links = {k: v for k, v in road_links.items()
+                      if LineString([tuple(l) for l in road_links[k]['coords']]).within(flood_poly)}
+
+    # if restriction:
+    #     road_links = {k: v for k, v in road_links.items()
+    #     if 'private' not in road_links[k]['descriptiveTerm'].lower()}
 
     g = nx.MultiDiGraph()  # initialise a MultiDiGraph object
 
-    print("Calculating Naismith's Weights\n")
+    print("\nCalculating Naismith's Weights...")
     for i, link in enumerate(road_links):
         prev_coords = road_links[link]['coords'][0]  # Coordinates of start node of edge
         next_coords = road_links[link]['coords'][-1]  # Coordinates of end node of edge
@@ -53,8 +58,12 @@ def dijkstra_path(start, end, g, road_links):
     a networkx graph and a dictionary of network links and returns a gpd df of
     the shortest dijkstra path with geometry, length, weight and travel time.
     """
-    print("Calculating shortest path\n")
-    path = nx.dijkstra_path(g, source=start[0], target=end[0], weight="weight")
+    print("\nCalculating shortest path...")
+    try:
+        path = nx.dijkstra_path(g, source=start, target=end, weight="weight")
+    except nx.NetworkXNoPath:
+        print("Unfortunately there is no safe path from your location to the highest point")
+        exit()
 
     df = pd.DataFrame({"A": path[:-1]})
     coords, lengths, weights = [], [], []  # Initailise a list to store LineString data

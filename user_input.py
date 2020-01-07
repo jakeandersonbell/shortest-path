@@ -1,7 +1,6 @@
 """Task 1: User Input"""
 
 from shapely.geometry import Point, Polygon
-from shapely.geometry import Point
 import geopandas as gpd
 
 
@@ -10,8 +9,8 @@ def get_ext_poly(bb=(430000, 80000, 465000, 95000)):
     Also return a radius negatively buffered Polygon for the extent.
     """
     iow_extent = Polygon([[bb[0], bb[1]], [bb[0], bb[3]], [bb[2], bb[3]], [bb[0], bb[3]]])
-    iow_5k_extent = Polygon([[bb[0]+5000, bb[1]+5000], [bb[0]+5000, bb[3]-5000],
-                             [bb[2]-5000, bb[3]-5000], [bb[0]+5000, bb[3]-5000]])
+    iow_5k_extent = Polygon([[bb[0] + 5000, bb[1] + 5000], [bb[0] + 5000, bb[3] - 5000],
+                             [bb[2] - 5000, bb[3] - 5000], [bb[0] + 5000, bb[3] - 5000]])
     return [iow_extent, iow_5k_extent]
 
 
@@ -34,7 +33,24 @@ def user_input():
                           "\x1B[3mTip: If one of your coordinates has 5 digits, try preceding it with 0\x1B[23m")
                 else:
                     coords = [int(i) for i in inp.split()]
-                    return Point(coords)
+                    return Point(coords), input_flood()
+
+
+def input_flood():
+    flood = input("\nIs there any coastal flooding?\n"
+                  "(coastal flooding setting will restrict the route to non-flooded areas\nand will take some time)\n\n"
+                  " [Y]/N ")
+    yes, flood_height, skip = ["y", "yes", "yeah", "ye", "yep", ""], "void", ["s", "S"]
+    if str(flood).lower() in yes:
+        while flood_height not in skip and not isinstance(flood_height, int):
+            try:
+                flood_height = input("What is the height of the flood (metres above sea level?) ")
+                if flood_height not in skip:
+                    flood_height = int(flood_height)
+            except ValueError:
+                print("\nYou did not input a number\nPlease try again or press S to skip: ")
+    flood_height = flood_height if flood_height not in skip and flood_height != "void" else False
+    return flood_height
 
 
 # test if user is within box extent aka not closer than 5km to the raster edge
@@ -65,4 +81,3 @@ def on_land(user_location, boundary_shp='data/shape/isle_of_wight.shp'):
     if not (island.contains(user_location)).bool():
         print("You are already in the water")
         exit()  # stop application if user is outside box extent
-

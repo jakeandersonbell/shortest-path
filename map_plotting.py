@@ -6,12 +6,14 @@ import numpy
 import matplotlib.pyplot as plt
 import numpy as np
 import cartopy.crs as ccrs
+from user_input import get_ext_poly
 
 
-def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd):
+def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, *flood_poly):
     """This function plots a map of the user_location, highest point and shortest path gpd df
     over an OS Explorer and elevation raster basemap.
     """
+    print("\nPlotting your shortest route to higher ground...")
     # background and the map extent
     background = rasterio.open('data/background/raster-50k_2724246.tif')
     back_array = background.read(1)
@@ -42,8 +44,13 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
     # imshow for the elevation raster
-    im = plt.imshow(dataset.read(1), extent=el_extent, cmap='terrain', origin='upper', zorder=0, alpha=0.6,
+    im = plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.45,
                     resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
+
+    if flood_poly:
+        for poly in flood_poly[0].geoms:
+            plt.plot(*poly.exterior.xy, color="blue",
+                     linewidth=0.5, zorder=2, alpha=1)
 
     # plotting the shortest path
     shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
