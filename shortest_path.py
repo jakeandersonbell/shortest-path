@@ -5,9 +5,10 @@ import networkx as nx
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import LineString
+from nearest_itn import make_index
 
 
-def naismiths_network(dataset, restriction=False, flood_poly=False):
+def naismiths_network(dataset, flood_poly=False):
     """Takes in rasterio elevation object and optional public road restriction bool and
     returns list(naismith weighted nx.MultiDiGraph, dict(road_links))
 
@@ -22,34 +23,44 @@ def naismiths_network(dataset, restriction=False, flood_poly=False):
         road_links = json.load(f)['roadlinks']
 
     if flood_poly:
-        print("\nFinding the roads that haven't been flooded...")
-        road_links = {k: v for k, v in road_links.items()
-                      if LineString([tuple(l) for l in road_links[k]['coords']]).within(flood_poly)}
-
-    # if restriction:
-    #     road_links = {k: v for k, v in road_links.items()
-    #     if 'private' not in road_links[k]['descriptiveTerm'].lower()}
+        print("\nFinding the roads that have been flooded...")
+        links_df = pd.DataFrame(road_links).transpose()
+        links_df['coords'] = links_df['coords'].apply(LineString)
+        links_gdf = gpd.GeoDataFrame(links_df, geometry='coords')
+        links_gdf = links_gdf[links_gdf.within(flood_poly)]
+        print("\nRemoving those from the directory...")
+        road_links = {k: v for k, v in road_links.items() if k in list(links_gdf.index)}
 
     g = nx.MultiDiGraph()  # initialise a MultiDiGraph object
 
     print("\nCalculating Naismith's Weights...")
     for i, link in enumerate(road_links):
+        for_diff, bac_diff = 0, 0
+        for j, coord in enumerate(road_links[link]['coords'][:-1]):
+            prev_coords = coord
+            next_coords = road_links[link]['coords'][j+1]
+            prev_elev = list(dataset.sample([(prev_coords[0], prev_coords[1])], 1))[0][0]
+            next_elev = list(dataset.sample([(next_coords[0], next_coords[1])], 1))[0][0]
+            if next_elev > prev_elev:
+                bac_diff += (next_elev - prev_elev) * 8.333
+            elif next_elev < prev_elev:
+                for_diff += (prev_elev - next_elev) * 8.333
         prev_coords = road_links[link]['coords'][0]  # Coordinates of start node of edge
         next_coords = road_links[link]['coords'][-1]  # Coordinates of end node of edge
         # Implement sample() to access band values at given array coordinates
         prev_elev = list(dataset.sample([(prev_coords[0], prev_coords[1])], 1))[0][0]
         next_elev = list(dataset.sample([(next_coords[0], next_coords[1])], 1))[0][0]
-        elev_diff = next_elev - prev_elev  # Change in elevation from start -> end nodes
-        forward, backward = 0, 0  # The default naismith's component for no change in elevation
-        if elev_diff > 0:  # Going uphill
-            forward = elev_diff * 8.333  # The vert/horiz ratio multiplier
-        elif elev_diff < 0:  # Downhill
-            backward = (elev_diff * -1) * 8.333  # Ensure weight is always increasing with elevation along edge
+        # elev_diff = next_elev - prev_elev  # Change in elevation from start -> end nodes
+        # forward, backward = 0, 0  # The default naismith's component for no change in elevation
+        # if elev_diff > 0:  # Going uphill
+        #     forward = elev_diff * 8.333  # The vert/horiz ratio multiplier
+        # elif elev_diff < 0:  # Downhill
+        #     backward = (elev_diff * -1) * 8.333  # Ensure weight is always increasing with elevation along edge
         # Add edges in both directions; naismith's only contributes to uphill directed edges
         g.add_edge(road_links[link]['start'], road_links[link]['end'], fid=link,
-                   weight=(road_links[link]['length'] + forward), st_height=prev_elev)
+                   weight=(road_links[link]['length'] + for_diff), st_height=prev_elev)
         g.add_edge(road_links[link]['end'], road_links[link]['start'], fid=link,
-                   weight=(road_links[link]['length'] + backward), st_height=next_elev)
+                   weight=(road_links[link]['length'] + bac_diff), st_height=next_elev)
     return [g, road_links]
 
 

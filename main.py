@@ -1,6 +1,7 @@
 """Flood Emergency Planning"""
 
 if __name__ == "__main__":
+    import geopandas as gpd
     from user_input import user_input, get_ext_poly, check_extent
     from highest_point_identification import get_high_point
     from nearest_itn import make_index, nearest_itn
@@ -16,7 +17,7 @@ if __name__ == "__main__":
 
     """Task 2: Highest Point Identification"""
 
-    idx = make_index()
+    idx = make_index(gpd.read_file('data/roads/nodes.shp'))
     high_point, dataset = get_high_point(user_location, extend, flood_height)
     flood_poly = make_flood_poly(dataset, flood_height)
     end_code, end_node = nearest_itn(high_point, idx)
@@ -33,4 +34,4 @@ if __name__ == "__main__":
 
     """Task 5: Map Plotting"""
 
-    map_plot(user_location, start_node, high_point, end_node, dataset, shortest_path_gpd, flood_poly)
+    map_plot(user_location, start_node, high_point, end_node, dataset, shortest_path_gpd, flood_poly=flood_poly)

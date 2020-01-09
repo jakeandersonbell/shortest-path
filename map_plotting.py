@@ -1,15 +1,15 @@
-
 """Task 5: Map Plotting"""
 
 import rasterio
 import numpy
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import cartopy.crs as ccrs
 from user_input import get_ext_poly
 
 
-def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, *flood_poly):
+def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, flood_poly=False):
     """This function plots a map of the user_location, highest point and shortest path gpd df
     over an OS Explorer and elevation raster basemap.
     """
@@ -48,9 +48,8 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
                     resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
     if flood_poly:
-        for poly in flood_poly[0].geoms:
-            plt.plot(*poly.exterior.xy, color="blue",
-                     linewidth=0.5, zorder=2, alpha=1)
+        for i in flood_poly.geoms:
+            plt.plot(*i.exterior.xy, color="blue", linewidth=0.5, alpha=0.7)
 
     # plotting the shortest path
     shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
@@ -70,9 +69,16 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     # 7) plotting the walking paths
     ax.plot(waking_route_user_node_lons, waking_route_user_node_lats, c='k', label='walking route', linewidth=0.5,
             linestyle='dashed')
-    plt.legend(fontsize=3, loc=2)
-    ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route', linewidth=0.5,
+
+    walking_patch = mpatches.Patch(color='k', label='Walking route')
+
+    if flood_poly:
+        flood_patch = mpatches.Patch(color='blue', label='Flood line')
+        plt.legend(fontsize=3, loc=2, handles=[flood_patch])
+    else:
+        plt.legend(fontsize=3, loc=2)
+    ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route',
+            linewidth=0.5,
             linestyle='dashed')
 
     plt.show()
-

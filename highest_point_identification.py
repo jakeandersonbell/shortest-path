@@ -52,13 +52,13 @@ def get_high_point(user_location, extend, flood_height, dataset_path='data/eleva
     else:
         highest_point = Point(dataset.xy(highest_point_row, highest_point_col))  # Array index -> Geographic Coordinates
     print('The highest point within 5km radius of you is', int(max_height), 'm high.')
-    print('The highest point is located at: ', highest_point)
+    print('The highest point is located at: ', highest_point.bounds[0:2])
     return [highest_point, dataset]  # Max height, highest point
 
 
 def get_elevation(extend, dataset, array_radius):
     if extend:
-        print("You're close to the edge\nHaving to extend the raster...")
+        print("\nYou're close to the edge\nHaving to extend the raster...")
         elevation = np.pad(dataset.read(1), (array_radius, array_radius), mode='constant', constant_values=(0, 0))
     else:
         elevation = dataset.read(1)

@@ -49,7 +49,7 @@ def input_flood():
                     flood_height = int(flood_height)
             except ValueError:
                 print("\nYou did not input a number\nPlease try again or press S to skip: ")
-    flood_height = flood_height if flood_height not in skip and flood_height != "void" else False
+    flood_height = flood_height if isinstance(flood_height, int) else False
     return flood_height
 
 

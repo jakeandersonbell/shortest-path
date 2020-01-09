@@ -17,16 +17,29 @@ def nearest_itn(target_location, idx):
     return [start_name, start_p]
 
 
-def make_index(node_shape_path='data/roads/nodes.shp'):
+def make_index(geodataframe):
     """Reads in a shp. of nodes and returns an rtree index"""
     print("\nMaking index...")
-    nodes = gpd.read_file(node_shape_path)
+    nodes = gpd.read_file('data/roads/nodes.shp')
 
     idx = index.Index()
 
     # loop though points in nodes and insert
-    for i, j in enumerate(nodes.iterrows()):
+    for i, j in enumerate(geodataframe.iterrows()):
         pbr = j[1][2].xy[0][0], j[1][2].xy[1][0], j[1][2].xy[0][0], j[1][2].xy[1][0]
         idx.insert(i, pbr, obj=j[1][0])
     return idx
 
+
+# def make_index(geodataframe, geometry_col='coords', object_col=1):
+#     """Reads in a shp. of nodes and returns an rtree index"""
+#     print("\nMaking index...")
+#     nodes = gpd.read_file('data/roads/nodes.shp')
+#
+#     idx = index.Index()
+#
+#     # loop though points in nodes and insert
+#     for i, j in enumerate(geodataframe.iterrows()):
+#         pbr = j[1][geometry_col].xy[0][0], j[1][geometry_col].xy[1][0], j[1][geometry_col].xy[0][0], j[1][geometry_col].xy[1][0]
+#         idx.insert(i, pbr, obj=j[object_col])
+#     return idx
