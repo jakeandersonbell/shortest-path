@@ -5,7 +5,6 @@ import networkx as nx
 import geopandas as gpd
 import pandas as pd
 from shapely.geometry import LineString
-from nearest_itn import make_index
 
 
 def naismiths_network(dataset, flood_poly=False):
@@ -22,7 +21,7 @@ def naismiths_network(dataset, flood_poly=False):
     with open('data/itn/solent_itn.json', 'r') as f:
         road_links = json.load(f)['roadlinks']
 
-    if flood_poly:
+    if flood_poly:  # Filter itn network for roads within the non-flooded area if a flood_poly has been provided
         print("\nFinding the roads that have been flooded...")
         links_df = pd.DataFrame(road_links).transpose()
         links_df['coords'] = links_df['coords'].apply(LineString)
@@ -35,7 +34,7 @@ def naismiths_network(dataset, flood_poly=False):
 
     print("\nCalculating Naismith's Weights...")
     for i, link in enumerate(road_links):
-        for_diff, bac_diff = 0, 0
+        for_diff, bac_diff = 0, 0  # Setting the default Naismith's contribution in both directions
         for j, coord in enumerate(road_links[link]['coords'][:-1]):
             # Loop goes into the nodes of individual itn links
             prev_coords = coord

@@ -43,7 +43,7 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
     # imshow for the elevation raster
-    plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.6,
+    plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.75,
                resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
     if flood_poly:
@@ -74,13 +74,14 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     user_star = mlines.Line2D([], [], color='r', marker="*", linestyle='None', markersize=2, label='Your location')
     high_point = mlines.Line2D([], [], color='k', marker='*', linestyle='None', markersize=2, label='Highest point')
 
+    # Dynamic legend - can handle absence of flood_poly
     if flood_poly:
         flood_patch = mlines.Line2D([], [], color='blue', label='Flood line', linewidth=0.5)
-        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch, flood_patch])
+        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch, flood_patch],
+                   title="Legend")
     else:
-        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch])
+        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch], title="Legend")
     ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route',
-            linewidth=0.5,
-            linestyle='dashed')
+            linewidth=0.5, linestyle='dashed')
 
     plt.show()

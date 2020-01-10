@@ -36,7 +36,6 @@ def user_input():
                     return Point(coords), input_flood()
 
 
-
 def input_flood():
     flood = input("\nIs there any coastal flooding?\n"
                   "(coastal flooding setting will restrict the route to non-flooded areas\nand will take some time)\n\n"
@@ -62,7 +61,7 @@ def check_extent(user_location, extent, extent_5k):
     if extent.contains(user_location):
         pass
     else:
-        print('You are too close to the edge - cannot calculate quickest route to the highest point')
+        print('You are not within the islands extent\n\nexiting application...')
         exit()  # stop application if user is outside box extent
     if not extent_5k.contains(user_location):
         # We must extend the region
@@ -70,9 +69,6 @@ def check_extent(user_location, extent, extent_5k):
     on_land(user_location)
     return extend
 
-
-# test if user is on the isle of wight and not in the sea
-# adjusted from https://automating-gis-processes.github.io/CSC18/lessons/L4/point-in-polygon.html
 
 def on_land(user_location, boundary_shp='data/shape/isle_of_wight.shp'):
     """Checks whether user is within the confines of the area of interest

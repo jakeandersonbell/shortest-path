@@ -1,11 +1,7 @@
-import rasterio
-import numpy as np
+"""Additional Task: Simulate Coastal Flooding"""
+
 from rasterio import features
 from shapely.geometry import Polygon, MultiPolygon
-from earthpy import clip
-
-# ds_path = 'data/elevation/sz.asc'
-# flood_height = 100
 
 
 def make_flood_poly(dataset, flood_height):

@@ -1,11 +1,10 @@
 """Task 2: Highest Point Identification"""
 
-# import required packages
 import rasterio
 import rasterio.mask
 import numpy as np
-from shapely.geometry import Polygon, Point, mapping
-from rasterio import features, transform
+from shapely.geometry import Point
+from rasterio import features
 
 
 def get_high_point(user_location, extend, flood_height, dataset_path='data/elevation/SZ.asc', radius=5000):
