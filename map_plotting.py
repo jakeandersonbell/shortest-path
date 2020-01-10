@@ -3,10 +3,9 @@
 import rasterio
 import numpy
 import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
+import matplotlib.lines as mlines
 import numpy as np
 import cartopy.crs as ccrs
-from user_input import get_ext_poly
 
 
 def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, flood_poly=False):
@@ -44,18 +43,18 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
     # imshow for the elevation raster
-    im = plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.45,
-                    resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
+    plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.6,
+               resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
     if flood_poly:
         for i in flood_poly.geoms:
             plt.plot(*i.exterior.xy, color="blue", linewidth=0.5, alpha=0.7)
 
     # plotting the shortest path
-    shortest_path_gpd.plot(ax=ax, edgecolor="blue", linewidth=0.5, zorder=2, label='ITN shorest path')
+    shortest_path_gpd.plot(ax=ax, edgecolor="green", linewidth=0.5, zorder=2, label='ITN shortest path')
 
     # scattering the user point the highest elevation point
-    ax.scatter(user_location.x, user_location.y, s=1.5, c='r', label='Your location')
+    ax.scatter(user_location.x, user_location.y, s=1.5, c='r', label='Your location', marker="*")
     ax.scatter(high_point.x, high_point.y, s=1.5, c='k', label='Highest_point', marker='*')
     # user_location.xy()[1] arrow
     x, y, arrow_length = 0.9, 0.95, 0.18
@@ -70,13 +69,16 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.plot(waking_route_user_node_lons, waking_route_user_node_lats, c='k', label='walking route', linewidth=0.5,
             linestyle='dashed')
 
-    walking_patch = mpatches.Patch(color='k', label='Walking route')
+    link_patch = mlines.Line2D([], [], color='green', label='ITN Shortest Path', linewidth=0.5)
+    walk_patch = mlines.Line2D([], [], color='k', label='Walking route', linewidth=0.5, linestyle='dashed')
+    user_star = mlines.Line2D([], [], color='r', marker="*", linestyle='None', markersize=2, label='Your location')
+    high_point = mlines.Line2D([], [], color='k', marker='*', linestyle='None', markersize=2, label='Highest point')
 
     if flood_poly:
-        flood_patch = mpatches.Patch(color='blue', label='Flood line')
-        plt.legend(fontsize=3, loc=2, handles=[flood_patch])
+        flood_patch = mlines.Line2D([], [], color='blue', label='Flood line', linewidth=0.5)
+        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch, flood_patch])
     else:
-        plt.legend(fontsize=3, loc=2)
+        plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch])
     ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route',
             linewidth=0.5,
             linestyle='dashed')

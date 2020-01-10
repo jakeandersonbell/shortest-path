@@ -36,6 +36,7 @@ def user_input():
                     return Point(coords), input_flood()
 
 
+
 def input_flood():
     flood = input("\nIs there any coastal flooding?\n"
                   "(coastal flooding setting will restrict the route to non-flooded areas\nand will take some time)\n\n"

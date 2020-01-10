@@ -15,7 +15,7 @@ def naismiths_network(dataset, flood_poly=False):
     Naismith's rule states that a reasonably fit person can walk at 5km/hr and an additional
     minute should be added for each 10 m of climb. Walking speed is therefor 83.3metres/min and
     climb component 10metres/min. Edge weight is penalised by elevation difference to a factor of the
-    walking:climbing speed ratio (8.3). This serves as a high resolution Naismith's weighting.
+    walking:climbing speed ratio (8.33). This serves as a high resolution Naismith's weighting.
     """
     print("\nOpening ITN...")
     # open the itn json and access the 'roadlinks' layer
@@ -37,26 +37,21 @@ def naismiths_network(dataset, flood_poly=False):
     for i, link in enumerate(road_links):
         for_diff, bac_diff = 0, 0
         for j, coord in enumerate(road_links[link]['coords'][:-1]):
+            # Loop goes into the nodes of individual itn links
             prev_coords = coord
             next_coords = road_links[link]['coords'][j+1]
             prev_elev = list(dataset.sample([(prev_coords[0], prev_coords[1])], 1))[0][0]
             next_elev = list(dataset.sample([(next_coords[0], next_coords[1])], 1))[0][0]
             if next_elev > prev_elev:
-                bac_diff += (next_elev - prev_elev) * 8.333
+                bac_diff += (next_elev - prev_elev) * 8.33
             elif next_elev < prev_elev:
-                for_diff += (prev_elev - next_elev) * 8.333
+                for_diff += (prev_elev - next_elev) * 8.33
         prev_coords = road_links[link]['coords'][0]  # Coordinates of start node of edge
         next_coords = road_links[link]['coords'][-1]  # Coordinates of end node of edge
         # Implement sample() to access band values at given array coordinates
         prev_elev = list(dataset.sample([(prev_coords[0], prev_coords[1])], 1))[0][0]
         next_elev = list(dataset.sample([(next_coords[0], next_coords[1])], 1))[0][0]
-        # elev_diff = next_elev - prev_elev  # Change in elevation from start -> end nodes
-        # forward, backward = 0, 0  # The default naismith's component for no change in elevation
-        # if elev_diff > 0:  # Going uphill
-        #     forward = elev_diff * 8.333  # The vert/horiz ratio multiplier
-        # elif elev_diff < 0:  # Downhill
-        #     backward = (elev_diff * -1) * 8.333  # Ensure weight is always increasing with elevation along edge
-        # Add edges in both directions; naismith's only contributes to uphill directed edges
+
         g.add_edge(road_links[link]['start'], road_links[link]['end'], fid=link,
                    weight=(road_links[link]['length'] + for_diff), st_height=prev_elev)
         g.add_edge(road_links[link]['end'], road_links[link]['start'], fid=link,
