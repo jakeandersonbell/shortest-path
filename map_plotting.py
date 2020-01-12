@@ -44,15 +44,15 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.imshow(background_image, origin="upper", extent=bg_extent, zorder=0)
 
     # imshow for the elevation raster
-    plt.imshow(dataset.read(1), extent=el_extent, cmap='YlOrRd', origin='upper', zorder=0, alpha=0.75,
+    plt.imshow(dataset.read(1), extent=el_extent, cmap='gist_earth', origin='upper', zorder=0, alpha=0.65,
                resample='True', vmax=numpy.amax(dataset.read(1)), vmin=numpy.amin(dataset.read(1)))
 
     if flood_poly:
         for i in flood_poly.geoms:
-            plt.plot(*i.exterior.xy, color="blue", linewidth=0.5, alpha=0.7)
+            plt.plot(*i.exterior.xy, color="darkgray", linewidth=0.5, alpha=0.7)
 
     # plotting the shortest path
-    shortest_path_gpd.plot(ax=ax, edgecolor="green", linewidth=0.5, zorder=2, label='ITN shortest path')
+    shortest_path_gpd.plot(ax=ax, edgecolor="orangered", linewidth=0.5, zorder=2, label='ITN shortest path')
 
     # scattering the user point the highest elevation point
     ax.scatter(user_location.x, user_location.y, s=1.5, c='r', label='Your location', marker="*")
@@ -62,10 +62,7 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.annotate('N', xy=(x, y), xytext=(x, y - arrow_length), arrowprops=dict(facecolor='black', width=2, headwidth=8),
                 ha='center', va='center', fontsize=9, xycoords=ax.transAxes)
 
-    # # adding scale bar - based on https://pypi.org/project/matplotlib-scalebar/
-    # scalebar = ScaleBar(5)  # 1 pixel = 5 meter
-    # plt.gca().add_artist(scalebar)
-
+    # adding scale bar
     scalebar = AnchoredSizeBar(ax.transData, 1000, '1 km', 'lower center',
                                pad=0.1, color='black', frameon=False, size_vertical=1)
 
@@ -79,14 +76,14 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.plot(waking_route_user_node_lons, waking_route_user_node_lats, c='k', label='walking route', linewidth=0.5,
             linestyle='dashed')
 
-    link_patch = mlines.Line2D([], [], color='green', label='ITN Shortest Path', linewidth=0.5)
+    link_patch = mlines.Line2D([], [], color='orangered', label='ITN Shortest Path', linewidth=0.5)
     walk_patch = mlines.Line2D([], [], color='k', label='Walking route', linewidth=0.5, linestyle='dashed')
     user_star = mlines.Line2D([], [], color='r', marker="*", linestyle='None', markersize=2, label='Your location')
     high_point = mlines.Line2D([], [], color='k', marker='*', linestyle='None', markersize=2, label='Highest point')
 
     # Dynamic legend - can handle absence of flood_poly
     if flood_poly:
-        flood_patch = mlines.Line2D([], [], color='blue', label='Flood line', linewidth=0.5)
+        flood_patch = mlines.Line2D([], [], color='darkgray', label='Flood line', linewidth=0.5)
         plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch, flood_patch],
                    title="Legend")
     else:
