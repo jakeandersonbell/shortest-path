@@ -7,12 +7,12 @@ import pandas as pd
 from shapely.geometry import LineString
 
 
-def naismiths_network(dataset, flood_poly=False):
+def naismiths_network(dataset, flood_poly=False, restriction=False):
     """Takes in rasterio elevation object and optional public road restriction bool and
     returns list(naismith weighted nx.MultiDiGraph, dict(road_links))
 
     Naismith's rule states that a reasonably fit person can walk at 5km/hr and an additional
-    minute should be added for each 10 m of climb. Walking speed is therefor 83.3metres/min and
+    minute should be added for each 10 m of climb. Walking speed is therefore 83.3metres/min and
     climb component 10metres/min. Edge weight is penalised by elevation difference to a factor of the
     walking:climbing speed ratio (8.33). This serves as a high resolution Naismith's weighting.
     """
@@ -29,6 +29,9 @@ def naismiths_network(dataset, flood_poly=False):
         links_gdf = links_gdf[links_gdf.within(flood_poly)]
         print("\nRemoving those from the directory...")
         road_links = {k: v for k, v in road_links.items() if k in list(links_gdf.index)}
+
+    if restriction:  # Extra marks; This feature can restrict the user to public roads
+        road_links = {k: v for k, v in road_links.items() if 'private' not in road_links[k]['descriptiveTerm'].lower()}
 
     g = nx.MultiDiGraph()  # initialise a MultiDiGraph object
 
