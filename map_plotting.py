@@ -4,8 +4,11 @@ import rasterio
 import numpy
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import matplotlib.cbook as cbook
+from matplotlib_scalebar.scalebar import ScaleBar
 import numpy as np
 import cartopy.crs as ccrs
+
 
 
 def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_path_gpd, flood_poly=False):
@@ -61,6 +64,10 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
     ax.annotate('N', xy=(x, y), xytext=(x, y - arrow_length), arrowprops=dict(facecolor='black', width=2, headwidth=8),
                 ha='center', va='center', fontsize=9, xycoords=ax.transAxes)
 
+    # adding scale bar - based on https://pypi.org/project/matplotlib-scalebar/
+    scalebar = ScaleBar(5)  # 1 pixel = 5 meter
+    plt.gca().add_artist(scalebar)
+
     # 6) plotting the color bar
     cbar = plt.colorbar(fraction=0.03, pad=0.03)
     cbar.set_label(r"Elevation", size=8)
@@ -83,5 +90,6 @@ def map_plot(user_location, user_node, high_point, high_node, dataset, shortest_
         plt.legend(fontsize=3, loc=2, handles=[user_star, high_point, walk_patch, link_patch], title="Legend")
     ax.plot(waking_route_highest_point_lons, waking_route_highest_point_lats, c='k', label='walking route',
             linewidth=0.5, linestyle='dashed')
+
 
     plt.show()
