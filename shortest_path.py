@@ -87,4 +87,8 @@ def dijkstra_path(start, end, g, road_links):
     df['weights'] = weights
     df['travel_t'] = [i * 1.388 for i in weights]
     gdf = gpd.GeoDataFrame(df, crs={'init': 'epsg:27700'}, geometry=df['geometry'])
+
+    print("\nThe shortest route is",  int(sum(lengths)), "metres long and will take",
+          str(int(sum([i * 1.388 for i in weights]) // 60)), "minutes and",
+          str(int(sum([i * 1.388 for i in weights]) % 60)), "seconds to walk.")
     return gdf
